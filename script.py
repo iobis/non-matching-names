@@ -3,19 +3,20 @@ import csv
 import pandas as pa
 import math
 
-names = requests.get("https://api.obis.org/checklist/nomatchvliz").json()["results"]
-
 vliz_list = pa.read_excel("vliz_list/Blacklist_update_20200626.xlsx", engine="openpyxl", na_values=["NA"], converters={"annotation_type": str, "annotation_resolved_AphiaID": str})
 vliz_list.set_index("scientificname_original", inplace=True)
 
-for i in range(len(names)):
-    name = names[i]["scientificname"]
+response = requests.get("https://datasets.obis.org/shared/non_matching_names.csv")
+names = [row for row in csv.DictReader(response.text.splitlines())]
+
+for line in names:
+    name = line["scientificname"]
     if name in vliz_list.index:
         entries = vliz_list.loc[[name]]
         if len(entries) == 1:
-            names[i]["annotation_type"] = entries["annotation_type"][0]
+            line["annotation_type"] = entries["annotation_type"][0]
             if isinstance(entries["annotation_resolved_AphiaID"][0], str) or not math.isnan(entries["annotation_resolved_AphiaID"][0]):
-                names[i]["annotation_aphiaid"] = entries["annotation_resolved_AphiaID"][0]
+                line["annotation_aphiaid"] = entries["annotation_resolved_AphiaID"][0]
 
 csv_cols = ["scientificname", "scientificnameid", "records", "phylum", "class", "order", "family", "genus", "annotation_type", "annotation_aphiaid", "datasets"]
 
