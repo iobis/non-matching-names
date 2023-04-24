@@ -2,8 +2,8 @@ name: build-list
 
 on:
   push:
-  schedule:
-    - cron: '0 15 * * 3'
+  #schedule:
+  #  - cron: '0 15 * * 3'
 
 jobs:
   build-list:
